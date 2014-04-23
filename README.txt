@@ -23,20 +23,17 @@ You will need to compile this example first:
 
   mvn compile
 
-This example can either run as a Camel client or server.
+These examples expect connectivity to existing email server as well as internet for testing gmail 
 
-* The client will send test email to the server as per settings in the properties file.
+ To run these examples you can execute the following command
+ 
+ mvn compile exec:java -PsendMail
+ mvn compile exec:java -PemailListener
+ mvn compile exec:java -PgmailListener
+ mvn compile exec:java -PmailWithAttachment
+ 
+There is a spring DSL which illustrates above route as well.
 
-* The server will receive email from the server and store the same local file system
-
-To run the client you type:
-
-  mvn compile exec:java -Pclient
-
-
-To run the server you type:
-  mvn compile exec:java -Pserver
-  
 
 This example is documented at
   http://camel.apache.org/mail-example.html [TODO]
