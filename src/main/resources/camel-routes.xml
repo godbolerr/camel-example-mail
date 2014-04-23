@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:camel="http://camel.apache.org/schema/spring"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+<!--    <import resource="classpath:META-INF/beans.xml"/> --> 
+
+	<bean id="properties" class="org.apache.camel.component.properties.PropertiesComponent">
+	    <property name="location" value="classpath:mail.properties"/>
+	    <property name="propertiesParser" ref="jasypt"></property>
+	</bean>
+	
+	<bean id="jasypt" class="org.apache.camel.component.jasypt.JasyptPropertiesParser">
+	    <property name="password" value="secret"/>
+	</bean>
+	
+	<bean id="mailAttachmentProcessor" class="org.apache.camel.example.mail.MailAttachmentProcessor"/>
+	
+  <!-- START SNIPPET: e1 -->
+  <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
+	 <camel:template id="camelTemplate"/>
+    
+	 
+    
+    
+    <route id="sendMail">
+      <from uri="direct:sendSmtpMail"/>
+        <to uri="smtp://{{smtp.host}}?username={{smtp.username}}&amp;password={{smtp.password}}&amp;from={{smtp.from.email}}&amp;contentType={{contentType}}"/>
+    </route>
+    
+   <route id="sendSmtpWithencryptedpasswd">
+      <from uri="direct:sendSmtpMailEncryptedPassword"/>
+        <to uri="smtp://{{smtp.host}}?username={{smtp.username}}&amp;password={{smtp.encrypted.password}}&amp;from={{smtp.from.email}}&amp;contentType={{contentType}}"/>
+    </route>
+    
+    
+    
+     <route id="emailListener">
+        <from uri="imap://localhost?username={{smtp.username}}&amp;password={{smtp.password}}&amp;unseen=true&amp;consumer.delay=60000"/>
+        	 <camel:process ref="mailAttachmentProcessor"/>
+        <to uri="file://receivedEmails"/>
+    </route>  
+    
+      <route id="gmailListner">
+        <from uri="imaps://imap.gmail.com?username={{gmail.username}}&amp;password={{gmail.password}}&amp;delete=false&amp;unseen=true&amp;consumer.delay=60000"/>
+        	 <camel:process ref="mailAttachmentProcessor"/>
+        <to uri="file://gmails"/>
+    </route>  
+     
+		
+    
+
+  </camelContext>
+  <!-- END SNIPPET: e1 -->
+
+</beans>
